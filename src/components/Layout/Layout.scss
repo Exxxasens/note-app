@@ -1,0 +1,9 @@
+.layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 400px;
+    .content-wrapper {
+        padding: 2rem;
+    }
+}
