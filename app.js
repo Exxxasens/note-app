@@ -1,55 +1,36 @@
-const { app, BrowserWindow , Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, TouchBar } = require('electron');
 const url = require('url');
 const path = require('path');
 
-class NoteApp {
-    constructor(mainWindowOptions) {
-        this.mainWindowOptions = mainWindowOptions;
-    }
+let mainWindow;
 
-    isMac = (process.platform === 'darwin');
-    isProduction = (process.env.NODE_ENV === 'production');
-    electronApp = app;
-    mainWindow = null;
-
-    createMainWindow = () => {
-        this.mainWindow = new BrowserWindow(this.mainWindowOptions || { width: 1200, height: 800, webPreferences: { devTools: true }});
-    }
-
-    onReady = (callback) => {
-        this.electronApp.on('ready', callback);
-        return this;
-    }
-
-    start = async (callback) => {
-        this.onReady(() => {
-            this.createMainWindow();
-            callback();
-        });
-        return this;
-    }
-
-    loadFile = (window, filePath) => {
-        const fileUrl = url.format({ 
-            pathname: path.join(__dirname, ...filePath),
-            protocol: 'file:',
-            slashes: true
-        });
-        return window.loadURL(fileUrl);
-    }
-
-    setMenu = (menuTemplate) => {
-        return Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
-    }
-
-    getMenu = () => Menu.getApplicationMenu();
-
+function setMenu (menuTemplate) {
+    return Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 }
 
-const noteApp = new NoteApp({ title: 'My Notes', autoHideMenuBar: true, height: 800, width: 1000 });
+function loadFile(window, filePath) {
+    const fileUrl = url.format({ 
+        pathname: path.join(__dirname, ...filePath),
+        protocol: 'file:',
+        slashes: true
+    });
+    return window.loadURL(fileUrl);
+}
 
-noteApp.start(() => {
-    noteApp.loadFile(noteApp.mainWindow, ['static', 'index.html']);
+app.on('ready', () => {
+    mainWindow = new BrowserWindow({ 
+        title: 'My Notes',
+        autoHideMenuBar: true,
+        height: 800,
+        width: 1000,
+        minHeight: 600,
+        minWidth: 800,
+        webPreferences: {
+            nodeIntegration: true,
+            enableRemoteModule: true
+        }
+    });
+    loadFile(mainWindow, ['static', 'index.html']);
     const menuTemplate = [
         { 
             label: 'Приложение',
@@ -60,5 +41,23 @@ noteApp.start(() => {
             ]
         }
     ]
-    noteApp.setMenu(menuTemplate);
+    
+    setMenu(menuTemplate);
+
+    const { TouchBarButton } = TouchBar;
+
+    ipcMain.on('set-touch-bar', (_, touchBarItems) => {
+        touchBarItems = touchBarItems.map(item => {
+            const { type, options } = item;
+            if(type === 'button') return new TouchBarButton(options);
+        });
+
+
+        const touchBar = new TouchBar({
+            items: touchBarItems
+        });
+
+        mainWindow.setTouchBar(touchBar);
+    });
+
 });
