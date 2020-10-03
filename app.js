@@ -46,7 +46,7 @@ class NoteApp {
 
 }
 
-const noteApp = new NoteApp({ title: 'My Notes', autoHideMenuBar: true });
+const noteApp = new NoteApp({ title: 'My Notes', autoHideMenuBar: true, height: 800, width: 1000 });
 
 noteApp.start(() => {
     noteApp.loadFile(noteApp.mainWindow, ['static', 'index.html']);
