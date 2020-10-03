@@ -8,7 +8,7 @@ const colorList = {
     'green': 'green'
 }
 
-export default ({ list }) => {
+export default ({ list, filterFn }) => {
     const beautifyDate = (date) => new Date(date).toLocaleString();
     const mapFn = ({ title, color, isImportant, category, complete, createdAt }, i) => {
         return (
@@ -26,7 +26,7 @@ export default ({ list }) => {
 
     return (
         <div className='note-list'>
-            { list.map(mapFn) }
+            { filterFn ? list.filter(filterFn).map(mapFn) : list.map(mapFn) }
         </div>
     )
 }
