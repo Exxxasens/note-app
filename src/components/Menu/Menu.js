@@ -10,7 +10,8 @@ const menu = [
             { label: 'Все', link: '/list/' },
             { label: 'Сегодня', link: 'today' },
             { label: 'Завтра', link: 'tomorrow' },
-            { label: 'Эта неделя', link: 'week' }
+            { label: 'Эта неделя', link: 'week' },
+            { label: 'Завершенные', link: 'done' }
         ]
     },
     { label: 'Календарь', icon: 'calendar_today', link: '/calendar' },
@@ -19,17 +20,15 @@ const menu = [
 
 export default () => {
     const [submenu, setSubmenu] = React.useState(null);
-    const [selectedId, setSelectedId] = React.useState(0);
-    const onSelect = (submenu) => setSubmenu(submenu); 
-    const mapFn = ({ label, icon, link, submenu }, i) => (<MenuItem
-        label={label}
+    const [submenuId, setSubmenuId] = React.useState(0);
+
+    const mapFn = ({ icon, link, submenu }, i) => (<MenuItem
         icon={icon}
         link={link}
         submenu={submenu}
         key={i}
-        showLabel={false}
-        handleClick={onSelect}
-    />)
+        handleClick={(submenu) => setSubmenu(submenu)}
+    />);
 
     return (
         <div className='menu-wrapper'>
@@ -40,17 +39,16 @@ export default () => {
                 <div className='menu'>
                     { menu.map(mapFn) }
                 </div>
-                { submenu ? <SubMenu list={submenu} selected={selectedId} onSelect={(i) => setSelectedId(i)}/> : null }
+                { submenu ? <SubMenu list={submenu} selected={submenuId} onSelect={(i) => setSubmenuId(i)}/> : null }
             </div>
         </div>
     )
 }
 
-const MenuItem = ({ label, icon, link, showLabel = true, showIcon = true, handleClick, submenu }) => {
+const MenuItem = ({ icon, link, handleClick, submenu }) => {
     return (
         <NavLink to={link} className='menu-item' activeClassName='selected' onClick={() => handleClick(submenu)} >
-                { icon && showIcon ? (<div className='icon'><span className="material-icons">{icon}</span></div>) : null }
-                { label && showLabel ? <div>{ label }</div> : null }
+                { icon ? (<div className='icon'><span className="material-icons">{icon}</span></div>) : null }
         </NavLink>
     )
 }

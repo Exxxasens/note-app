@@ -10,11 +10,13 @@ export default (createTouchBarFn, touchBarUpdateFn) => {
     }, [createTouchBarFn]);
 
     React.useEffect(() => {
-        if(touchBarItems) touchBarUpdateFn(touchBarItems);
+        if(touchBarItems && touchBarUpdateFn) touchBarUpdateFn(touchBarItems);
     }, [touchBarUpdateFn]);
 
     React.useEffect(() => {
-        return () => getCurrentWindow().setTouchBar(null);
+        return () => {
+            getCurrentWindow().setTouchBar(null);
+        }
     }, []);
 
 }
