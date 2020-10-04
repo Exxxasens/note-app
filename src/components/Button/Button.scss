@@ -1,0 +1,15 @@
+.btn-wrapper {
+    button {
+        background-color: #597aff;
+        font-size: 16px;
+        padding: 0.8rem 2rem;
+        border-radius: 6px;
+        border: none;
+        color: white;
+        box-shadow: 0px 0px 1rem 0px rgba(0, 0, 0, 0.1);
+        &:hover {
+            cursor: pointer;
+            box-shadow: 0px 0px 1rem 0px rgba(0, 0, 0, 0.2);
+        }
+    }
+}
