@@ -5,13 +5,13 @@ import './Menu.scss';
 
 const menu = [
     { 
-        label: 'Напоминания', icon: 'list', link: '/list/',
+        label: 'Напоминания', icon: 'list', link: '/list/all',
         submenu: [
-            { label: 'Все', link: '/list/' },
+            { label: 'Все', link: '/list/all' },
             { label: 'Сегодня', link: 'today' },
             { label: 'Завтра', link: 'tomorrow' },
             { label: 'Эта неделя', link: 'week' },
-            { label: 'Завершенные', link: 'done' }
+            { label: 'Выполненные', link: 'done' }
         ]
     },
     { label: 'Календарь', icon: 'calendar_today', link: '/calendar' },
@@ -19,16 +19,61 @@ const menu = [
 ];
 
 export default () => {
-    const [submenu, setSubmenu] = React.useState(null);
+    const [menuItemId, setMenuItemId] = React.useState(null);
     const [submenuId, setSubmenuId] = React.useState(0);
+    const history = useHistory();
+    const submenu = menu[menuItemId] ?  menu[menuItemId]['submenu'] : null;
 
-    const mapFn = ({ icon, link, submenu }, i) => (<MenuItem
+    const handleClick = (i) => {
+        setMenuItemId(i);
+        setSubmenuId(0);
+    }
+    const mapFn = ({ icon, link }, i) => (<MenuItem
         icon={icon}
         link={link}
         submenu={submenu}
         key={i}
-        handleClick={(submenu) => setSubmenu(submenu)}
+        handleClick={handleClick}
+        i={i}
+        isSelected={i === menuItemId}
     />);
+
+    const onTouchBarButtonClick = (link, i) => {
+        if(i !== menuItemId) {
+            setMenuItemId(i);
+            setSubmenuId(0);
+            history.push(link);
+        }
+    }
+    const touchBarSelect = (i) => {
+        history.push(submenu[i].link);
+        setSubmenuId(i);
+    }
+    const createTouchBar = ({ TouchBarScrubber, TouchBarButton }) => {
+        const buttons = menu.map(({ label, link }, i) => {
+            let backgroundColor = menuItemId === i ? '#597aff' : null;
+            return new TouchBarButton({ label, click: () => onTouchBarButtonClick(link, i), backgroundColor })
+        })
+        if(submenu) {
+            const items = submenu.map(({ label }) => ({ label }));
+            buttons.push(new TouchBarScrubber({ items, highlight: (i) => touchBarSelect(i) }));
+        }
+        return buttons;
+    }
+
+    const updateTouchBar = (touchBarItems) => {
+        if(touchBarItems) {
+            touchBarItems.forEach((item, i) => {
+                let backgroundColor = (menuItemId === i) ? '#597aff' : null;
+                item.backgroundColor = backgroundColor;
+            }); 
+        }
+    }
+
+    useTouchBar(
+        React.useCallback(createTouchBar, [menuItemId]),
+        React.useCallback(updateTouchBar, [menuItemId])
+    );
 
     return (
         <div className='menu-wrapper'>
@@ -45,43 +90,18 @@ export default () => {
     )
 }
 
-const MenuItem = ({ icon, link, handleClick, submenu }) => {
+const MenuItem = ({ icon, link, handleClick, i, isSelected }) => {
+    let classList = ['menu-item'];
+    if(isSelected) classList.push('selected');
+    classList = classList.join(' ');
     return (
-        <NavLink to={link} className='menu-item' activeClassName='selected' onClick={() => handleClick(submenu)} >
+        <Link to={link} className={classList} onClick={() => handleClick(i)} >
                 { icon ? (<div className='icon'><span className="material-icons">{icon}</span></div>) : null }
-        </NavLink>
+        </Link>
     )
 }
 
 const SubMenu = ({ list, selected, onSelect }) => {
-    const history = useHistory();
-
-    const updateTouchBar = (touchBarItems) => {
-        touchBarItems.forEach((touchBarItem, i) => {
-            touchBarItem.backgroundColor = i === selected ? '#597aff' : '#ffffff';
-        });     
-    }
-
-    const createTouchBar = ({ TouchBarButton }) => {
-        const touchBarMapFn = ({ label, link }, i) => {
-            return new TouchBarButton({ 
-                label, 
-                backgroundColor: i === selected ? '#597aff' : '#ffffff',
-                click: () => {
-                    onSelect(i);
-                    history.push(link);
-                }
-            });
-        }
-        return list.map(touchBarMapFn);
-    }
-
-    useTouchBar(
-        React.useCallback(createTouchBar, [list]),
-        React.useCallback(updateTouchBar, [selected])
-    );
-
-
     const mapFn = ({ label, link }, i) => {
         let classList = ['submenu-item'];
         if(i === selected) classList.push('selected');
