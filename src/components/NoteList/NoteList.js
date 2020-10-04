@@ -10,10 +10,13 @@ const colorList = {
 
 export default ({ list, filterFn }) => {
     const beautifyDate = (date) => new Date(date).toLocaleString();
-    const mapFn = ({ title, color, isImportant, category, complete, createdAt }, i) => {
+    const mapFn = ({ title, color, isImportant, category, done, createdAt }, i) => {
+        let classList = ['note-item'];
+        if(done) classList.push('done');
+        classList = classList.join(' ');
         return (
-            <div className='note-item' key={i}>
-                <div className='title'>{title}</div>
+            <div className={classList} key={i}>
+                <div className='title-wrapper'><div className='title'>{title}</div></div>
                 <div className='row'>
                     { color ? <div className='circle' style={{ backgroundColor: colorList[color] }}></div> : null }
                     { category ? <div className='category'>{ category }</div> : null }
@@ -25,8 +28,10 @@ export default ({ list, filterFn }) => {
     }
 
     return (
-        <div className='note-list'>
-            { filterFn ? list.filter(filterFn).map(mapFn) : list.map(mapFn) }
+        <div className='note-list-wrapper'>
+            <div className='note-list'>
+                { filterFn ? list.filter(filterFn).map(mapFn) : list.map(mapFn) }
+            </div>
         </div>
     )
 }
