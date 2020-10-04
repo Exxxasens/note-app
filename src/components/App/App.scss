@@ -8,10 +8,25 @@ body {
         min-height: 100vh;
         display: flex;
         flex-direction: row;
-        color: #363636;
+
+        .add {
+            background-color: #597aff;
+            padding: 0.5rem 1rem;
+        }
     }
 }
 
 *, *::after, *::before {
     box-sizing: border-box;
+}
+
+@media (prefers-color-scheme: dark) {
+    .wrapper {
+        color: whitesmoke;
+    }
+}
+@media (prefers-color-scheme: light) {
+    .wrapper {
+        color: #363636;
+    }
 }
