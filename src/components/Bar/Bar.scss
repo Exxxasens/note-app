@@ -1,16 +1,22 @@
-.top-bar {
+.bar {
     width: 100%;
     padding: 1rem 2rem;
-    min-height: 5.5rem;
 }
+
 @media (prefers-color-scheme: dark) {
-    .top-bar {
+    .bar.top {
         border-bottom: 1px solid rgb(15, 17, 23);
+    }
+    .bar.bottom {
+        border-top: 1px solid rgb(15, 17, 23);
     }
 }
 
 @media (prefers-color-scheme: light) {
-    .top-bar {
+    .bar.top {
         border-bottom: 1px solid rgb(230, 230, 230);
+    }
+    .bar.bottom {
+        border-top:1px solid rgb(230, 230, 230);
     }
 }

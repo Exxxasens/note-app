@@ -1,16 +1,19 @@
 import React from 'react';
-import TopBar from '../TopBar';
+import Bar from '../Bar';
 import './Layout.scss';
 
-export default ({ topBar, children }) => {
+export default ({ topBar, children, bottomBar }) => {
     return (
         <div className='layout'>
-            <TopBar>
+            <Bar className='top'>
                 { topBar }
-            </TopBar>
+            </Bar>
             <div className='content-wrapper'>
                 { children }
             </div>
+            <Bar className='bottom'>
+                { bottomBar }
+            </Bar>
         </div>
     )
 }
