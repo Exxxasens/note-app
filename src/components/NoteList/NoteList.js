@@ -20,7 +20,7 @@ export default ({ list, filterFn }) => {
                 <div className='row'>
                     { color ? <div className='circle' style={{ backgroundColor: colorList[color] }}></div> : null }
                     { category ? <div className='category'>{ category }</div> : null }
-                    <span className="material-icons icon">{ isImportant ? 'star' : 'star_outline' }</span>
+                    { isImportant ?  <div className='important'><span className="material-icons icon">star</span>Важное</div> : null }
                     <div className='item-create-date'>{ beautifyDate(createdAt) }</div>
                 </div>
             </div>

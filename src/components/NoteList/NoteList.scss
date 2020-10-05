@@ -6,15 +6,13 @@
         display: flex;
         flex-direction: column;
         .note-item {
-            padding: 1.5rem;
-            border-radius: 10px;
-            font-size: 1.2rem;
-            margin: 1rem;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 0.5rem 2rem;
 
             .title-wrapper {
                 display: flex;
             }
-    
         }
     
         .row {
@@ -23,7 +21,19 @@
             align-items: center;
             font-size: 0.8rem;
             font-weight: 300;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
+            .important {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-right: 0.5rem;
+                .icon {
+                    line-height: 0;
+                }
+            }
+            .category {
+                margin-right: 0.5rem;
+            }
             .circle {
                 height: 0.5rem;
                 width: 0.5rem;
