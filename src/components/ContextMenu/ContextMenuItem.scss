@@ -1,0 +1,19 @@
+.context-menu-item {
+    color: #767676;
+    cursor: pointer;
+    padding: 0.75rem;
+    border-radius: 6px;
+    &:hover {
+        background-color: whitesmoke;
+        color: #363636;
+    }
+    &:last-of-type {
+        margin-bottom: 0;
+    }
+}
+.context-menu-separator {
+    margin: 0.5rem 0;
+    position: relative;
+    background: #e6e6e6;
+    height: 1px;
+}
