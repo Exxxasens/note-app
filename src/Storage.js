@@ -1,128 +1,73 @@
-const { app } = require('electron').remote;
-const fs = require('fs');
-const path = require('path');
-const EventEmitter = require('events').EventEmitter;
-
-class Storage  extends EventEmitter {
-    constructor(filePath) {
-        super();
-        if(!filePath) throw new Error('path is required!');
-        this._path = filePath;
-        this.data = {
-            collections: {},
-            collectionList: []
-        };
-        this.init = false;
+class EventEmitter {
+    constructor() {
+        this.events = {};
     }
 
-    loadFromFile() {
-        if(fs.existsSync(this._path)) {
-            fs.readFile(this._path, {}, (err, result) => {
-                if(err) {
-                    console.log(err);
-                    throw new Error('Failed to read file: ' + this._path);
-                }
-                this.data = JSON.parse(result.toString());
-                this.init = true;
-                this.emit('ready');
-
-            })
-        } else {
-            fs.open(this._path, 'a+', (err) => {
-                fs.writeFileSync(this._path, JSON.stringify(this.data));
-                this.emit('ready');
-                this.init = true;
-                if(err) {
-                    console.log(err);
-                    throw new Error('Failed to open file: ' + this._path);
-                }
-            });
-        }
-    }
-    
-    saveData() {
-        console.log(this.data);
-        fs.writeFileSync(this._path, JSON.stringify(this.data));
-    }
-
-    generateID() {
-        // Modeled after base64 web-safe chars, but ordered by ASCII.
-        var PUSH_CHARS = '-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz';
-      
-        // Timestamp of last push, used to prevent local collisions if you push twice in one ms.
-        var lastPushTime = 0;
-      
-        // We generate 72-bits of randomness which get turned into 12 characters and appended to the
-        // timestamp to prevent collisions with other clients.  We store the last characters we
-        // generated because in the event of a collision, we'll use those same characters except
-        // "incremented" by one.
-        var lastRandChars = [];
-      
-        return (function() {
-            var now = new Date().getTime();
-            var duplicateTime = (now === lastPushTime);
-            lastPushTime = now;
-        
-            var timeStampChars = new Array(8);
-            for (var i = 7; i >= 0; i--) {
-                timeStampChars[i] = PUSH_CHARS.charAt(now % 64);
-                now = Math.floor(now / 64);
-            }
-            if (now !== 0) throw new Error('We should have converted the entire timestamp.');
-        
-            var id = timeStampChars.join('');
-        
-            if (!duplicateTime) {
-                for (i = 0; i < 12; i++) {
-                    lastRandChars[i] = Math.floor(Math.random() * 64);
-                }
-            } else {
-                for (i = 11; i >= 0 && lastRandChars[i] === 63; i--) {
-                    lastRandChars[i] = 0;
-                }
-                lastRandChars[i]++;
-            }
-            for (i = 0; i < 12; i++) {
-                id += PUSH_CHARS.charAt(lastRandChars[i]);
-            }
-            if(id.length != 20) throw new Error('Length should be 20.');
-        
-            return id;
-        })();
-    }
-    createCollection(name) {
-        if(this.data.collectionList.findIndex((collection) => collection === name) >= 0) {
-            throw new Error('collection is already exist');
-        }
-        this.data.collectionList.push(name);
-        this.data.collections[name] = {};
-    }
-    getAllCollections() {
-        return this.data.collectionList;
-    }
-    getCollection(name) {
-        return this.data.collections[name];
-    }
-    getItem(collection, id) {
-        return this.data.collections[collection][id];
-    }
-    getAllItems(collection) {
-        return Object.values(this.data.collections[collection]);
-    }
-    deleteItem(collection, id) {
-        delete this.data.collections[collection][id];
-        this.saveData();
+    emit(name, ...args) {
+    		if(!this.events[name]) return;
+        this.events[name].map(fn => fn(...args));
         return this;
     }
-    addItem(collection, data) {
-        const id = this.generateID();
-        if(!this.data.collections[collection]) return new Error(collction + ' is not exist');
-        if(this.data.collections[collection][id]) return this.addItem(collection, data);
-        const createdAt = new Date();
-        const updatedAt = new Date();
-        this.data.collections[collection][id] = { ...data, id, createdAt, updatedAt };
-        this.saveData();
-        return this.data.collections[collection][id];
+
+    on(name, handler) {
+        if(!this.events[name]) this.events[name] = [];
+        this.events[name].push(handler);
+        return handler;
+    }
+
+    removeListener(name, handler) {
+        this.events[name] = this.events[name].filter(fn => fn !== handler);
+        
+        return this;
+    }
+		
+    once(name, handler) {
+        let wrapper = (...args) => {
+        		handler(...args);
+            this.removeListener(name, wrapper);
+        }
+        this.on(name, wrapper);
+        return handler;
+        
+    }
+
+}
+
+
+
+class Storage extends EventEmitter {
+    constructor() {
+        super();
+    }
+    get(key) {
+        if(!this.has(key)) throw new Error('Item doesn\'t exist');
+        return JSON.parse(localStorage.getItem(key));
+    }
+    set(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+        this.emit('change');
+        return value;
+    }
+    has(key) {
+        return Boolean(localStorage.getItem(key));
+    }
+    addItem(key, value) {
+        if(this.has(key)) throw new Error('Item is already exist');
+        return this.set(key, value);
+    }
+    updateItem(key, options) {
+        if(!this.has(key)) throw new Error('Item doesn\'t exist');
+        let item = this.get(key);
+        item = Object.assign(item, options);
+        this.set(key, item);
+        this.emit('change');
+        return item;
+    }
+    deleteItem(key) {
+        let item = localStorage.get(key);
+        localStorage.removeItem(key)
+        this.emit('change');
+        return item;
     }
 }
-module.exports = new Storage(path.join(app.getPath('userData'), 'storage.json'));
+
