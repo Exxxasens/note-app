@@ -19,8 +19,13 @@ export default ({ children, onSelect, onSubMenuSelect }) => {
     return (
         <>
             { subMenu ? 
-                <div className='submenu'>{React.Children.map(subMenu, (item, i) => 
-                    React.cloneElement(item, { selected: subMenuSelected === i, onSelect: () => handleSubMenuSelect(i, item.props) }))}</div>
+                <div className='submenu'>
+                    {React.Children.map(
+                        subMenu, 
+                        (item, i) => item ? React.cloneElement(item, 
+                            { selected: subMenuSelected === i, onSelect: () => handleSubMenuSelect(i, item.props) }) : null
+                    )
+                }</div>
             : 
                 null 
             }

@@ -2,16 +2,12 @@ import React from 'react';
 import Button from '../Button';
 import './CreateNote.scss';
 
-export default ({ onCreate, options = {} }) => {
+export default ({ onCreate }) => {
     const [value, setValue] = React.useState('');
     const handleSubmit = (event) => {
         event.preventDefault();
         if(value.length === 0) return null;
-        onCreate({ 
-            title: value,
-            isImportant: options.isImportant || false,
-            category: null
-        });
+        onCreate(value);
         setValue('');
     }
     const handleInputChange = (event) => {

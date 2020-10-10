@@ -7,7 +7,7 @@ body {
         width: 100%;
         min-height: 100vh;
         display: grid;
-        grid-template-columns: 80px 240px repeat(4, 1fr);
+        grid-template-columns: 80px 240px repeat(3, 1fr) 240px;
         grid-template-rows: 1fr;
         grid-template-areas: 
         'menu submenu . . . .';
@@ -17,10 +17,6 @@ body {
             padding: 0.5rem 1rem;
         }
     }
-}
-
-.top-bar-div {
-    color: #767676;
 }
 
 *, *::after, *::before {

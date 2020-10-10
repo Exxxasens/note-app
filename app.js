@@ -1,7 +1,6 @@
-const { app, BrowserWindow, Menu, ipcMain, TouchBar } = require('electron');
-const url = require('url');
+const { app, BrowserWindow, Menu, ipcMain, TouchBar, nativeTheme } = require('electron');
 const path = require('path');
-
+const url = require('url');
 let mainWindow;
 
 function setMenu (menuTemplate) {
@@ -25,9 +24,11 @@ app.on('ready', () => {
         width: 1000,
         minHeight: 600,
         minWidth: 800,
+        vibrancy: 'header',
         webPreferences: {
             nodeIntegration: true,
-            enableRemoteModule: true
+            enableRemoteModule: true,
+            worldSafeExecuteJavaScript: true
         }
     });
     loadFile(mainWindow, ['static', 'index.html']);
@@ -59,5 +60,6 @@ app.on('ready', () => {
 
         mainWindow.setTouchBar(touchBar);
     });
-
+    console.log(nativeTheme.shouldUseDarkColors);
+    nativeTheme.themeSource = 'light';
 });

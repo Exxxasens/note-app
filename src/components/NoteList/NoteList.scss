@@ -2,6 +2,7 @@
     position: relative;
     overflow: auto;
     height: 100%;
+    margin: 1rem 0;
     .note-list {
         display: flex;
         flex-direction: column;
@@ -82,35 +83,12 @@ note-item.done.animated {
     }
 }
 
-@media (prefers-color-scheme: dark) {
-    .note-list {
-        .note-item {
-            background-color: rgb(15, 17, 23);
-            .title {
-                color: whitesmoke;
-            }
-            .row {
-                color: darken($color: whitesmoke, $amount: 25);
-            }
-            &:hover {
-                box-shadow: 0px 0px 1rem 0px rgba(0, 0, 0, 0.1);
-                background-color: lighten($color: rgb(15, 17, 23), $amount: 25);
-                color: whitesmoke;
-                .row {
-                    color: whitesmoke;
-                }
-            }
-        }
-    }
-}
-
 @media (prefers-color-scheme: light) {
     .note-list {
         .note-item {
-            background-color: whitesmoke;
+            background-color: rgba(255, 255, 255, 0.5);
             &:hover {
-                box-shadow: 0px 0px 1rem 0px rgba(0, 0, 0, 0.1);
-                background-color: white;
+                box-shadow: 0px 0px 1rem 0px rgba(0, 0, 0, 0.05);
             }
         }
         .row {

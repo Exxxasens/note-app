@@ -6,12 +6,18 @@ export default ({ link, icon, children, selected, className, title, onSelect }) 
     classList.push(className ? className : 'menu-item');
     if(selected) classList.push('active');
     classList = classList.join(' ');
-    return (
-        <>
-            <Link to={link} className={classList} onClick={() => onSelect(children)}  >
+    if(!link) {
+        return (
+            <div className={classList} onClick={() => onSelect(children)}  >
                 { icon ? <div className='icon'><span className="material-icons">{ icon }</span></div> : null }
                 { title ? <div className='title'>{title}</div> : null }
-            </Link>
-        </>
+            </div>
+        )
+    }
+    return (
+        <Link to={link} className={classList} onClick={() => onSelect(children)}  >
+            { icon ? <div className='icon'><span className="material-icons">{ icon }</span></div> : null }
+            { title ? <div className='title'>{title}</div> : null }
+        </Link>
     )
 }

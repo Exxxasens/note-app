@@ -1,6 +1,7 @@
 import React from 'react';
 import './NoteList.scss';
 import { ContextMenu, ContextMenuItem as MenuItem, MenuSeparator } from '../ContextMenu';
+import StorageContext from '../contexts/StorageContext';
 
 const colorList = {
     'blue': '#597aff',
@@ -9,17 +10,30 @@ const colorList = {
     'green': 'green'
 }
 
-export default ({ list, filterFn, onDelete, onToggleImportant, onToggleDone, onTitleChange }) => {
-    const mapFn = ({ id, ...rest }) => 
+export default ({ list, filterFn }) => {
+    const storage = React.useContext(StorageContext);
+    const onDelete = (_id) => {
+        storage.deleteNote(_id);
+    }
+    const onToggleImportant = (_id, i) => {
+        storage.updateNote(_id, { important: !i });
+    }
+    const onToggleDone = (_id, d) => {
+        storage.updateNote(_id, { done: !d });
+    }
+    const onTitleChange = (_id, title) => {
+        storage.updateNote(_id, { title });
+    }
+
+    const mapFn = ({ _id, ...rest }) => 
         <NoteItem {...rest} 
-            key={id} 
-            id={id} 
+            key={_id} 
+            id={_id} 
             onDelete={onDelete} 
             onToggleImportant={onToggleImportant}
             onToggleDone={onToggleDone}
             onTitleChange={onTitleChange}
         />;
-
     return (
         <div className='note-list-wrapper'>
             <div className='note-list'>
@@ -29,7 +43,7 @@ export default ({ list, filterFn, onDelete, onToggleImportant, onToggleDone, onT
     )
 }
 
-const NoteItem = ({ id, title, color, isImportant, category, done, createdAt, onDelete, onToggleDone, onToggleImportant, onTitleChange }) => {
+const NoteItem = ({ id, title, color, important, category, done, createdAt, onDelete, onToggleDone, onToggleImportant, onTitleChange }) => {
     const inputRef = React.useRef();
     const [show, setShow] = React.useState(false);
     const [position, setPosition] = React.useState({});
@@ -39,7 +53,7 @@ const NoteItem = ({ id, title, color, isImportant, category, done, createdAt, on
         if(innerText.length === 0) return onDelete(id);
     }
     const toggleImportant = () => {
-        onToggleImportant(id, isImportant);
+        onToggleImportant(id, important);
     }
     const toggleDone = () => {
         onToggleDone(id, done);
@@ -50,7 +64,7 @@ const NoteItem = ({ id, title, color, isImportant, category, done, createdAt, on
     const contextMenu = (
         <ContextMenu position={position} onHide={() => setShow(false)}>
             <MenuItem onClick={toggleImportant}>
-                { isImportant ? 'Отметить как обычное' : 'Отметить как важное' }
+                { important ? 'Отметить как обычное' : 'Отметить как важное' }
             </MenuItem>
             <MenuItem onClick={toggleDone}>
                 { done ? 'Отметить как не выполненное' : ' Отметить как выполненное'}
@@ -85,7 +99,7 @@ const NoteItem = ({ id, title, color, isImportant, category, done, createdAt, on
             <div className='row'>
                 { color ? <div className='circle' style={{ backgroundColor: colorList[color] }}></div> : null }
                 { category ? <div className='category'>{ category }</div> : null }
-                { isImportant ?  <div className='important'><span className="material-icons icon">star</span>Важное</div> : null }
+                { important ?  <div className='important'><span className="material-icons icon">star</span>Важное</div> : null }
                 <div className='item-create-date'>{ beautifyDate(createdAt) }</div>
             </div>
         </div>

@@ -1,4 +1,7 @@
-
 .main-page {
     padding: 1rem 2rem;
+    grid-column: 3 / 7;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
