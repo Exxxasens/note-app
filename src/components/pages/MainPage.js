@@ -7,14 +7,6 @@ import StorageContext from '../contexts/StorageContext';
 
 export default ({ filterNotesFn, topBarSubTitle, notes, handleCreate }) => {
     const storage = React.useContext(StorageContext);
-    console.log(notes)
-    const onDelete = () => {
-        console.log(1);
-    }
-    const onToggleDone = () => {
-
-    }
-
     return (
         <div className='main-page'>
             <TopBar>

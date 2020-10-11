@@ -1,11 +1,12 @@
 import React from 'react';
 import './App.scss';
-import { Menu, MenuItem} from '../Menu';
+import { Menu, MenuItem } from '../Menu';
 import MainPage from '../pages/MainPage';
 import { HashRouter as Router, Switch, Route } from "react-router-dom";
 import withRouteToProps from '../hoc/withRouteToProps';
 import StorageApi from '../../Storage';
 import StorageContext from '../contexts/StorageContext';
+import CreateCategory from '../CreateCategory';
 
 const MainPageWithProps = withRouteToProps(MainPage, ({ match: { params: { type }} }) => {
     let filterFn = null;
@@ -30,8 +31,8 @@ export default () => {
         setTitle(title);
     }
 
-    const mapFn = (c) => {
-        return c ? <MenuItem title={c} link={c} type='category' /> : null;
+    const mapFn = ({ title, _id }) => {
+        return (title && _id) ? <MenuItem title={title} link={_id} type='category' key={_id} /> : null;
     }
 
     const onCreate = (title) => {
@@ -40,16 +41,31 @@ export default () => {
         storage.addNote({ title, category, done: false, important: false });
     }
 
+    const onCategoryCreate = (title, color) => {
+        storage.addCategory({ title, color })
+            .then(doc => console.log(doc))
+            .catch(err => console.log(err));
+    }
+
     window.storage = storage;
 
     React.useEffect(() => {
-        storage.getAllNotes().
-            then(notes => {
-                setNotes(notes.sort((a, b) => a.createdAt - b.createdAt));
-                setCategories(storage.getAllCategoriesNames(notes));
-            })
-            .catch(err => console.log(err));
+        const updateState = () => {
+            storage.getAllNotesWithCategories()
+                .then(notes => setNotes(notes.sort((a, b) => a.createdAt - b.createdAt)))
+                .catch(err => console.log(err));
+            storage.getAllCategories()
+                .then(categories => setCategories(categories))
+                .catch(err => console.log(err));
+            console.log('update');
+            console.log(categories);
+        }
+        storage.on('update', updateState);
+        updateState();
+        return () => storage.removeAllListeners();
     }, []);
+
+    console.log(categories);
 
     return (
         <Router>
@@ -60,7 +76,9 @@ export default () => {
                             <MenuItem title='Все' link='/list/all'/>
                             <MenuItem title='Завтра' link='/list/tomorrow'/>
                             <MenuItem title='Выполненные' link='/list/done'/>
+                            <div className='menu-separator'></div>
                             { categories ? categories.map(mapFn) : null }
+                            <CreateCategory onCreate={onCategoryCreate} />
                         </MenuItem>
                         <MenuItem link='/calendar' icon='calendar_today'></MenuItem>
                         <MenuItem link='/settings' icon='settings'></MenuItem>

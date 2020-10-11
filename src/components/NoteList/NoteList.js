@@ -2,6 +2,8 @@ import React from 'react';
 import './NoteList.scss';
 import { ContextMenu, ContextMenuItem as MenuItem, MenuSeparator } from '../ContextMenu';
 import StorageContext from '../contexts/StorageContext';
+import MenuItemOptions from '../ContextMenu/MenuItemOptions';
+import useStorage from '../hooks/useStorage';
 
 const colorList = {
     'blue': '#597aff',
@@ -24,6 +26,9 @@ export default ({ list, filterFn }) => {
     const onTitleChange = (_id, title) => {
         storage.updateNote(_id, { title });
     }
+    const onCategoryChange = (noteId, categoryId) => {
+        storage.updateNote(noteId, { category: categoryId });
+    }
 
     const mapFn = ({ _id, ...rest }) => 
         <NoteItem {...rest} 
@@ -33,6 +38,7 @@ export default ({ list, filterFn }) => {
             onToggleImportant={onToggleImportant}
             onToggleDone={onToggleDone}
             onTitleChange={onTitleChange}
+            onCategoryChange={onCategoryChange}
         />;
     return (
         <div className='note-list-wrapper'>
@@ -43,7 +49,8 @@ export default ({ list, filterFn }) => {
     )
 }
 
-const NoteItem = ({ id, title, color, important, category, done, createdAt, onDelete, onToggleDone, onToggleImportant, onTitleChange }) => {
+const NoteItem = ({ id, title, color, important, category, done, createdAt, onDelete, onToggleDone, onToggleImportant, onTitleChange, onCategoryChange }) => {
+    const categories = useStorage('categories');
     const inputRef = React.useRef();
     const [show, setShow] = React.useState(false);
     const [position, setPosition] = React.useState({});
@@ -70,7 +77,11 @@ const NoteItem = ({ id, title, color, important, category, done, createdAt, onDe
                 { done ? 'Отметить как не выполненное' : ' Отметить как выполненное'}
             </MenuItem>
             { done ? null : <MenuItem onClick={() => inputRef.current.focus()}>Изменить</MenuItem> }
-            { done ? null : <MenuItem onClick={() => console.log('Категория')}>Категория</MenuItem>}
+            { done ? null : 
+                (<MenuItemOptions onClick={(_, cId) => onCategoryChange(id, cId)} title='Категория'>
+                    { categories.map(({ title, _id }) => <MenuItem key={_id} id={_id}>{ title }</MenuItem>) }
+                </MenuItemOptions>)
+            }
             <MenuSeparator/>
             <MenuItem onClick={() => onDelete(id)}>Удалить</MenuItem>
         </ContextMenu>
@@ -97,8 +108,8 @@ const NoteItem = ({ id, title, color, important, category, done, createdAt, onDe
                 </div>
             </div>
             <div className='row'>
-                { color ? <div className='circle' style={{ backgroundColor: colorList[color] }}></div> : null }
-                { category ? <div className='category'>{ category }</div> : null }
+                { category ? <div className='circle' style={{ backgroundColor: colorList[category.color] }}></div> : null }
+                { category ? <div className='category'>{ category.title }</div> : null }
                 { important ?  <div className='important'><span className="material-icons icon">star</span>Важное</div> : null }
                 <div className='item-create-date'>{ beautifyDate(createdAt) }</div>
             </div>

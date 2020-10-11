@@ -1,0 +1,40 @@
+.create-category {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: auto;
+    margin-bottom: 1rem;
+    .hidden {
+        z-index: -555;
+        opacity: 0;
+    }
+    .create-category-input-wrapper {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.5);
+        margin: 0 1rem;
+        padding: 1rem;
+        border-radius: 8px;
+        input {
+            background: transparent;
+            color: #363636;
+            border: none;
+            font-size: 1rem;
+            padding: 0;
+            width: 100%;
+            &:focus {
+                outline: none;
+            }
+        }
+    }
+    button {
+        padding: 0;
+        margin: 0;
+        color: #363636;
+        background: transparent;
+        border: 0;
+        &:focus {
+            outline: none;
+        }
+    }
+}

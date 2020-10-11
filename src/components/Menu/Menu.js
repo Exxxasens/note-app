@@ -1,4 +1,5 @@
 import React from 'react';
+import MenuItem from './MenuItem';
 import './Menu.scss';
 
 
@@ -22,10 +23,13 @@ export default ({ children, onSelect, onSubMenuSelect }) => {
                 <div className='submenu'>
                     {React.Children.map(
                         subMenu, 
-                        (item, i) => item ? React.cloneElement(item, 
-                            { selected: subMenuSelected === i, onSelect: () => handleSubMenuSelect(i, item.props) }) : null
-                    )
-                }</div>
+                        (item, i) => {
+                            if(!item || item.type !== MenuItem) return item;
+                            return React.cloneElement(item, 
+                                { selected: subMenuSelected === i, onSelect: () => handleSubMenuSelect(i, item.props) })
+                        })
+                    }
+                </div>
             : 
                 null 
             }

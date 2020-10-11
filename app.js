@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain, TouchBar, nativeTheme } = require('electron');
+const { app, BrowserWindow, Menu, nativeTheme } = require('electron');
 const path = require('path');
 const url = require('url');
 let mainWindow;
@@ -24,14 +24,16 @@ app.on('ready', () => {
         width: 1000,
         minHeight: 600,
         minWidth: 800,
-        vibrancy: 'header',
+        vibrancy: 'menu',
         webPreferences: {
             nodeIntegration: true,
             enableRemoteModule: true,
             worldSafeExecuteJavaScript: true
         }
     });
-    loadFile(mainWindow, ['static', 'index.html']);
+    loadFile(mainWindow, ['static', 'index.html'])
+        .then(() => console.log('padge loaded'))
+        .catch(() => console.log('cannot load page'));
     const menuTemplate = [
         { 
             label: 'Приложение',
@@ -44,22 +46,5 @@ app.on('ready', () => {
     ]
     
     setMenu(menuTemplate);
-
-    const { TouchBarButton } = TouchBar;
-
-    ipcMain.on('set-touch-bar', (_, touchBarItems) => {
-        touchBarItems = touchBarItems.map(item => {
-            const { type, options } = item;
-            if(type === 'button') return new TouchBarButton(options);
-        });
-
-
-        const touchBar = new TouchBar({
-            items: touchBarItems
-        });
-
-        mainWindow.setTouchBar(touchBar);
-    });
-    console.log(nativeTheme.shouldUseDarkColors);
     nativeTheme.themeSource = 'light';
 });
