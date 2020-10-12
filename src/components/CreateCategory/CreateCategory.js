@@ -5,7 +5,7 @@ export default ({ onCreate }) => {
     const inputRef = React.useRef();
     const [show, setShow] = React.useState(false);
     const [name, setName] = React.useState('');
-    const [color, setColor] = React.useState('red');
+    const [color, setColor] = React.useState('purple');
 
     const handleCreate = (e) => {
         if(e) e.preventDefault();

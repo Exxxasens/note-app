@@ -8,15 +8,6 @@ import StorageApi from '../../Storage';
 import StorageContext from '../contexts/StorageContext';
 import CreateCategory from '../CreateCategory';
 
-
-const colorList = {
-    'blue': '#597aff',
-    'red': 'red',
-    'yellow': 'yellow',
-    'green': 'green'
-}
-
-
 const MainPageWithProps = withRouteToProps(MainPage, ({ match: { params: { type }} }) => {
     let filterFn = null;
     if(type === 'all') {
@@ -35,25 +26,29 @@ export default () => {
     const [title, setTitle] = React.useState(null);
     const [category, setCategory] = React.useState(null);
 
-    const handleSubMenuSelect = ({ title, type }) => {
-        if(type === 'category') setCategory(title);
+    const handleSubMenuSelect = ({ title, type, id }) => {
+        if(type === 'category') {
+            setCategory(id);
+        } else {
+            setCategory(null);
+        }
         setTitle(title);
     }
 
     const mapFn = ({ title, _id, color }) => {
         const titleDiv = (
             <>
-                <div className='circle' style={{ backgroundColor: colorList[color] }}></div>
+                <div className='circle' style={{ backgroundColor: globalThis.getColor(color) }}></div>
                 { title }
             </>
         )
-        return (title && _id) ? <MenuItem className='menu-item row' title={titleDiv} link={_id} type='category' key={_id} /> : null;
+        return (title && _id) ? <MenuItem className='menu-item row' title={titleDiv} link={`/list/category/${_id}`} type='category' key={_id} id={_id}/> : null;
     }
 
     const onCreate = (title) => {
-        let note = { title, category, done: false, important: false };
-        console.log(note);
-        storage.addNote({ title, category, done: false, important: false });
+        let note = { title, done: false, important: false };
+        if(category) note['category'] = category;
+        storage.addNote(note);
     }
 
     const onCategoryCreate = (title, color) => {
@@ -72,15 +67,15 @@ export default () => {
             storage.getAllCategories()
                 .then(categories => setCategories(categories))
                 .catch(err => console.log(err));
-            console.log('update');
-            console.log(categories);
         }
         storage.on('update', updateState);
         updateState();
-        return () => storage.removeAllListeners();
+        console.log('sub')
+        return () => {
+            console.log('deleted APP compononent')
+            console.log(storage.removeAllListeners('update'));
+        }
     }, []);
-
-    console.log(categories);
 
     return (
         <Router>
@@ -99,12 +94,33 @@ export default () => {
                         <MenuItem link='/settings' icon='settings' title='Настройки'></MenuItem>
                     </Menu>
                     <Switch>
-                        <Route path='/list/:type'>
-                            <MainPage 
-                                topBarSubTitle={title} 
-                                notes={notes} 
-                                handleCreate={onCreate}/>
-                        </Route>
+                        <Route path='/list/category/:id' 
+                            render={({ match }) => {
+                                let filterFn = ({ category: noteCategory}) => noteCategory._id === match.params.id;
+                                return  <MainPage 
+                                    topBarSubTitle={title} 
+                                    notes={notes} 
+                                    handleCreate={onCreate}
+                                    filterNotesFn={filterFn}
+                                />
+                            }} 
+                        />
+                        <Route path='/list/:type'
+                            render={({ match }) => {
+                                let filterFn = null;
+                                const { type } = match.params;
+                                if(type === 'done') {
+                                    filterFn = ({ done }) => done;
+                                }
+                                return <MainPage 
+                                    topBarSubTitle={title} 
+                                    notes={notes} 
+                                    handleCreate={onCreate}
+                                    filterNotesFn={filterFn}
+                                />
+
+                            }}
+                        />
                     </Switch>
                 </div>
             </StorageContext.Provider>

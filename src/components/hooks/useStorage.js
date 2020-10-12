@@ -21,5 +21,5 @@ export default (type) => {
         return () => storage.removeListener('update', getData);
     }, []);
 
-    return data;
+    return [];
 }

@@ -12,7 +12,8 @@ export default ({ filterNotesFn, topBarSubTitle, notes, handleCreate }) => {
                 { topBarSubTitle ? <div className='top-bar-div'>{ topBarSubTitle }</div> : null } 
             </TopBar>
             <NoteList 
-                list={notes} 
+                list={notes}
+                filterFn={filterNotesFn}
             />
             <CreateNote onCreate={handleCreate}/>
         </div>
