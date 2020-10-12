@@ -29,7 +29,6 @@ export default ({ list, filterFn }) => {
     const onCategoryChange = (noteId, categoryId) => {
         storage.updateNote(noteId, { category: categoryId });
     }
-
     const mapFn = ({ _id, ...rest }) => 
         <NoteItem {...rest} 
             key={_id} 
@@ -49,7 +48,7 @@ export default ({ list, filterFn }) => {
     )
 }
 
-const NoteItem = ({ id, title, color, important, category, done, createdAt, onDelete, onToggleDone, onToggleImportant, onTitleChange, onCategoryChange }) => {
+const NoteItem = ({ id, title, important, category, done, createdAt, onDelete, onToggleDone, onToggleImportant, onTitleChange, onCategoryChange }) => {
     const categories = useStorage('categories');
     const inputRef = React.useRef();
     const [show, setShow] = React.useState(false);
@@ -68,6 +67,10 @@ const NoteItem = ({ id, title, color, important, category, done, createdAt, onDe
     const handleTitleChange = () => {
         onTitleChange(id, inputRef.current.innerText);
     }
+    const handleCategoryChange = (id, cId) => {
+        if(category && (cId === category._id)) return onCategoryChange(id, null);
+        return onCategoryChange(id, cId);
+    }
     const contextMenu = (
         <ContextMenu position={position} onHide={() => setShow(false)}>
             <MenuItem onClick={toggleImportant}>
@@ -78,8 +81,10 @@ const NoteItem = ({ id, title, color, important, category, done, createdAt, onDe
             </MenuItem>
             { done ? null : <MenuItem onClick={() => inputRef.current.focus()}>Изменить</MenuItem> }
             { done ? null : 
-                (<MenuItemOptions onClick={(_, cId) => onCategoryChange(id, cId)} title='Категория'>
-                    { categories.map(({ title, _id }) => <MenuItem key={_id} id={_id}>{ title }</MenuItem>) }
+                (<MenuItemOptions onClick={(_, cId) => handleCategoryChange(id, cId)} title='Категория'>
+                    { categories.map(({ title, _id }) => <MenuItem key={_id} id={_id}>
+                        <div>{ title }</div>
+                    </MenuItem>) }
                 </MenuItemOptions>)
             }
             <MenuSeparator/>

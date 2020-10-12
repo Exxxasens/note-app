@@ -8,6 +8,15 @@ import StorageApi from '../../Storage';
 import StorageContext from '../contexts/StorageContext';
 import CreateCategory from '../CreateCategory';
 
+
+const colorList = {
+    'blue': '#597aff',
+    'red': 'red',
+    'yellow': 'yellow',
+    'green': 'green'
+}
+
+
 const MainPageWithProps = withRouteToProps(MainPage, ({ match: { params: { type }} }) => {
     let filterFn = null;
     if(type === 'all') {
@@ -26,13 +35,19 @@ export default () => {
     const [title, setTitle] = React.useState(null);
     const [category, setCategory] = React.useState(null);
 
-    const handleSlecteSubMenu = (title, type) => {
+    const handleSubMenuSelect = ({ title, type }) => {
         if(type === 'category') setCategory(title);
         setTitle(title);
     }
 
-    const mapFn = ({ title, _id }) => {
-        return (title && _id) ? <MenuItem title={title} link={_id} type='category' key={_id} /> : null;
+    const mapFn = ({ title, _id, color }) => {
+        const titleDiv = (
+            <>
+                <div className='circle' style={{ backgroundColor: colorList[color] }}></div>
+                { title }
+            </>
+        )
+        return (title && _id) ? <MenuItem className='menu-item row' title={titleDiv} link={_id} type='category' key={_id} /> : null;
     }
 
     const onCreate = (title) => {
@@ -71,8 +86,8 @@ export default () => {
         <Router>
             <StorageContext.Provider value={storage}>
                 <div className='wrapper'>
-                    <Menu onSubMenuSelect={({ title, type }) => handleSlecteSubMenu(title, type)}>
-                        <MenuItem icon='list'>
+                    <Menu onSubMenuSelect={handleSubMenuSelect}>
+                        <MenuItem icon='list' title='Напоминания'>
                             <MenuItem title='Все' link='/list/all'/>
                             <MenuItem title='Завтра' link='/list/tomorrow'/>
                             <MenuItem title='Выполненные' link='/list/done'/>
@@ -80,8 +95,8 @@ export default () => {
                             { categories ? categories.map(mapFn) : null }
                             <CreateCategory onCreate={onCategoryCreate} />
                         </MenuItem>
-                        <MenuItem link='/calendar' icon='calendar_today'></MenuItem>
-                        <MenuItem link='/settings' icon='settings'></MenuItem>
+                        <MenuItem link='/calendar' icon='calendar_today' title='Календарь'></MenuItem>
+                        <MenuItem link='/settings' icon='settings' title='Настройки'></MenuItem>
                     </Menu>
                     <Switch>
                         <Route path='/list/:type'>

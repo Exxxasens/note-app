@@ -1,43 +1,20 @@
 import React from 'react';
-import MenuItem from './MenuItem';
 import './Menu.scss';
 
 
 export default ({ children, onSelect, onSubMenuSelect }) => {
     const [selected, setSelected] = React.useState(null);
-    const [subMenuSelected, setSubMenuSelected] = React.useState(null);
-    const [subMenu, setSubMenu] = React.useState(null);
-    const handleSubMenuSelect = (i, props) => {
-        setSubMenuSelected(i);
-        if(onSubMenuSelect) onSubMenuSelect(props);
-    }
-    const handleSelect = (i, props, subMenu) => {
-        setSelected(i);
-        setSubMenuSelected(null);
-        setSubMenu(subMenu);
+    const handleSelect = (i, props) => {
         if(onSelect) onSelect(props);
-    } 
+        setSelected(i);
+    }
     return (
         <>
-            { subMenu ? 
-                <div className='submenu'>
-                    {React.Children.map(
-                        subMenu, 
-                        (item, i) => {
-                            if(!item || item.type !== MenuItem) return item;
-                            return React.cloneElement(item, 
-                                { selected: subMenuSelected === i, onSelect: () => handleSubMenuSelect(i, item.props) })
-                        })
-                    }
-                </div>
-            : 
-                null 
-            }
             <div className='menu'>
                 {React.Children.map(
                     children, 
                     (MenuItem, i) => React.cloneElement(MenuItem, 
-                        { onSelect: (subMenu) => handleSelect(i, MenuItem.props, subMenu), selected: i === selected }
+                        { onSelect: (subMenu) => handleSelect(i, MenuItem.props, subMenu), selected: (i === selected), onSubMenuSelect }
                     )
                 )}
             </div>

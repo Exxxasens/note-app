@@ -18,7 +18,7 @@ export default (type) => {
         }
         storage.on('update', getData);
         getData();
-        return () => storage.removeEventListener('update', getData);
+        return () => storage.removeListener('update', getData);
     }, []);
 
     return data;

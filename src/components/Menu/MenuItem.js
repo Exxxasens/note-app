@@ -1,23 +1,44 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export default ({ link, icon, children, selected, className, title, onSelect }) => {
+export default ({ link, icon, children, selected, className, title, onSelect, onSubMenuSelect }) => {
+    const [selectedItem, setSelectedItem] = React.useState(null);
     let classList = [];
     classList.push(className ? className : 'menu-item');
     if(selected) classList.push('active');
     classList = classList.join(' ');
-    if(!link) {
-        return (
-            <div className={classList} onClick={() => onSelect(children)}  >
-                { icon ? <div className='icon'><span className="material-icons">{ icon }</span></div> : null }
-                { title ? <div className='title'>{title}</div> : null }
-            </div>
-        )
-    }
-    return (
-        <Link to={link} className={classList} onClick={() => onSelect(children)}  >
+
+    let innerContent = (
+        <>
             { icon ? <div className='icon'><span className="material-icons">{ icon }</span></div> : null }
             { title ? <div className='title'>{title}</div> : null }
-        </Link>
+        </>
+    )
+
+
+    return (
+        <>
+            {
+                link ? <Link to={link} className={classList} onClick={() => onSelect(children)}>{ innerContent }</Link>
+                : <div className={classList} onClick={() => onSelect(children)}>{ innerContent }</div>
+            }
+            { selected && children ? 
+                    <div className='submenu'>
+                        {React.Children.map(
+                            children, 
+                            (item, i) => {
+                                let handleSelect = () => {
+                                    setSelectedItem(i);
+                                    onSubMenuSelect(item.props);
+                                }
+                                return React.cloneElement(item, 
+                                    { selected: i === selectedItem, onSelect: handleSelect })
+                            })
+                        }
+                    </div>
+                : 
+                    null 
+            }
+        </>
     )
 }
