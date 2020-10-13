@@ -4,6 +4,7 @@ import { ContextMenu, ContextMenuItem as MenuItem, MenuSeparator } from '../Cont
 import StorageContext from '../contexts/StorageContext';
 import MenuItemOptions from '../ContextMenu/MenuItemOptions';
 import useStorage from '../hooks/useStorage';
+import useContextMenu from '../hooks/useContextMenu';
 
 export default ({ list, filterFn }) => {
     const storage = React.useContext(StorageContext);
@@ -26,8 +27,42 @@ export default ({ list, filterFn }) => {
 
 const NoteItem = ({ id, title, important, category, done, createdAt, categories, storage }) => {
     const inputRef = React.useRef();
-    const [show, setShow] = React.useState(false);
-    const [position, setPosition] = React.useState({});
+    const showContextMenu = useContextMenu(React.useCallback(() => [
+        {
+            label: 'Редактировать',
+            click: () => inputRef.current && inputRef.current.focus()
+        },
+        {
+            label: 'Выполнено',
+            type: 'checkbox',
+            checked: done,
+            click: toggleDone
+        },
+        {
+            label: 'Важное',
+            type: 'checkbox',
+            checked: important,
+            click: toggleImportant
+        },
+        {
+            label: 'Категория',
+            type: 'submenu',
+            submenu: categories.map(c => ({
+                label: c.title,
+                type: 'radio',
+                checked: category ? (c._id === category._id) : false,
+                click: () => handleCategoryChange(c._id)
+            }))
+        },
+        {
+            type: 'separator'
+        },
+        {
+            label: 'Удалить',
+            click: onDelete
+        }], 
+    [category, done, important, title, id, categories]));
+
     const beautifyDate = (date) => new Date(date).toLocaleString();
     const handleInput = (event) => {
         let { innerText } = event.target;
@@ -45,39 +80,14 @@ const NoteItem = ({ id, title, important, category, done, createdAt, categories,
     const handleTitleChange = () => {
         storage.updateNote(id, { title: inputRef.current.innerText });
     }
-    const handleCategoryChange = (id, cId) => {
+    const handleCategoryChange = (cId) => {
         if(category && (cId === category._id)) return storage.updateNote(id, { category: null });
         return storage.updateNote(id, { category: cId });
-    }
-    const contextMenu = (
-        <ContextMenu position={position} onHide={() => setShow(false)}>
-            <MenuItem onClick={toggleImportant}>
-                { important ? 'Отметить как обычное' : 'Отметить как важное' }
-            </MenuItem>
-            <MenuItem onClick={toggleDone}>
-                { done ? 'Отметить как не выполненное' : ' Отметить как выполненное'}
-            </MenuItem>
-            { done ? null : <MenuItem onClick={() => inputRef.current.focus()}>Изменить</MenuItem> }
-            { done ? null : 
-                (<MenuItemOptions onClick={(_, cId) => handleCategoryChange(id, cId)} title='Категория'>
-                    { categories.map(({ title, _id }) => <MenuItem key={_id} id={_id}>
-                        <div>{ title }</div>
-                    </MenuItem>) }
-                </MenuItemOptions>)
-            }
-            <MenuSeparator/>
-            <MenuItem onClick={onDelete}>Удалить</MenuItem>
-        </ContextMenu>
-    );
-    const showContextMenu = ({ clientX: x, clientY: y }) => {
-        setShow(true);
-        setPosition({ x, y });
     }
     let classList = ['note-item'];
     if(done) classList.push('done');
     classList = classList.join(' ');
     return (
-        <>
         <div className={classList} onContextMenu={showContextMenu}>
             <div className='title-wrapper'>
                 <div className='title' 
@@ -97,7 +107,5 @@ const NoteItem = ({ id, title, important, category, done, createdAt, categories,
                 <div className='item-create-date'>{ beautifyDate(createdAt) }</div>
             </div>
         </div>
-        { show ? contextMenu : null }
-        </>
     )
 }

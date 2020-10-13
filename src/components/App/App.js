@@ -96,7 +96,7 @@ export default () => {
                     <Switch>
                         <Route path='/list/category/:id' 
                             render={({ match }) => {
-                                let filterFn = ({ category: noteCategory}) => noteCategory._id === match.params.id;
+                                let filterFn = ({ category: c }) => c && (c._id === match.params.id);
                                 return  <MainPage 
                                     topBarSubTitle={title} 
                                     notes={notes} 
@@ -109,9 +109,7 @@ export default () => {
                             render={({ match }) => {
                                 let filterFn = null;
                                 const { type } = match.params;
-                                if(type === 'done') {
-                                    filterFn = ({ done }) => done;
-                                }
+                                if(type === 'done') filterFn = ({ done }) => done;
                                 return <MainPage 
                                     topBarSubTitle={title} 
                                     notes={notes} 
