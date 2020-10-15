@@ -7,8 +7,9 @@ import withRouteToProps from '../hoc/withRouteToProps';
 import StorageApi from '../../Storage';
 import StorageContext from '../contexts/StorageContext';
 import CreateCategory from '../CreateCategory';
+import useContextMenu from '../hooks/useContextMenu';
 
-const MainPageWithProps = withRouteToProps(MainPage, ({ match: { params: { type }} }) => {
+const WrappedMainPage = withRouteToProps(MainPage, ({ match: { params: { type }} }) => {
     let filterFn = null;
     if(type === 'all') {
         filterFn = (item) => !item.done
@@ -17,7 +18,35 @@ const MainPageWithProps = withRouteToProps(MainPage, ({ match: { params: { type 
         filterFn = (item) => item.done;
     }
     return { filterNotesFn: filterFn };
-})
+});
+
+const { dialog, getCurrentWindow } = require('electron').remote;
+const CategoryMenuItem = ({ storage, name, ...rest}) => {
+    const onDelete = () => {
+        const options = {
+            type: 'question',
+            buttons: ['Отменить', 'Удалить категорию и все вложения', 'Удалить только категорию'],
+            defaultId: 2,
+            title: 'Удалить',
+            message: `Удалить категорию "${name}"?`,
+        };
+        dialog.showMessageBox(getCurrentWindow(), options)
+            .then(({ response }) => {
+                if(response === 2) storage.deleteCategory(rest.id);
+                // TODO: add method to delete all notes with the specified cateogry
+                if(response === 1) console.log('delete all');
+            });
+    }
+    const showContextMenu = useContextMenu(
+        React.useCallback(() => [
+                {
+                    label: 'Удалить',
+                    click: onDelete
+                }
+            ], [])
+    );
+    return <MenuItem {...rest} onContextMenu={showContextMenu} />
+}
 
 export default () => {
     const storage = React.useMemo(() => new StorageApi(), []);
@@ -27,22 +56,27 @@ export default () => {
     const [category, setCategory] = React.useState(null);
 
     const handleSubMenuSelect = ({ title, type, id }) => {
-        if(type === 'category') {
-            setCategory(id);
-        } else {
-            setCategory(null);
-        }
+        type === 'category' ? setCategory(id) : setCategory(null);
         setTitle(title);
     }
-
     const mapFn = ({ title, _id, color }) => {
+        if(!title || !_id) return null;
         const titleDiv = (
-            <>
+            <React.Fragment>
                 <div className='circle' style={{ backgroundColor: globalThis.getColor(color) }}></div>
                 { title }
-            </>
+            </React.Fragment>
         )
-        return (title && _id) ? <MenuItem className='menu-item row' title={titleDiv} link={`/list/category/${_id}`} type='category' key={_id} id={_id}/> : null;
+        return <CategoryMenuItem
+            storage={storage}
+            className='menu-item row'
+            name={title}
+            title={titleDiv}
+            link={`/list/category/${_id}`}
+            type='category'
+            id={_id}
+            key={_id}
+        />;
     }
 
     const onCreate = (title) => {
@@ -56,8 +90,9 @@ export default () => {
             .then(doc => console.log(doc))
             .catch(err => console.log(err));
     }
-
-    window.storage = storage;
+    
+    // TODO: delete this
+    // window.storage = storage;
 
     React.useEffect(() => {
         const updateState = () => {
@@ -70,11 +105,7 @@ export default () => {
         }
         storage.on('update', updateState);
         updateState();
-        console.log('sub')
-        return () => {
-            console.log('deleted APP compononent')
-            console.log(storage.removeAllListeners('update'));
-        }
+        return () => storage.removeAllListeners('update');
     }, []);
 
     return (
@@ -106,18 +137,16 @@ export default () => {
                             }} 
                         />
                         <Route path='/list/:type'
-                            render={({ match }) => {
-                                let filterFn = null;
-                                const { type } = match.params;
-                                if(type === 'done') filterFn = ({ done }) => done;
-                                return <MainPage 
-                                    topBarSubTitle={title} 
-                                    notes={notes} 
-                                    handleCreate={onCreate}
-                                    filterNotesFn={filterFn}
-                                />
-
-                            }}
+                            render={
+                                ({ match, location, history }) => <WrappedMainPage
+                                        match={match}
+                                        location={location}
+                                        history={history}
+                                        topBarSubTitle={title} 
+                                        notes={notes} 
+                                        handleCreate={onCreate} 
+                                    />
+                                }
                         />
                     </Switch>
                 </div>

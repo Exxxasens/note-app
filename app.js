@@ -24,7 +24,7 @@ app.on('ready', () => {
         width: 1000,
         minHeight: 600,
         minWidth: 800,
-        vibrancy: 'menu',
+        vibrancy: 'selection',
         webPreferences: {
             nodeIntegration: true,
             enableRemoteModule: true,
@@ -46,5 +46,4 @@ app.on('ready', () => {
     ]
     
     setMenu(menuTemplate);
-    nativeTheme.themeSource = 'light';
 });

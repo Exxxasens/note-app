@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export default ({ link, icon, children, selected, className, title, onSelect, onSubMenuSelect }) => {
+export default ({ link, icon, children, selected, className, title, onSelect, onSubMenuSelect, ...rest }) => {
     const [selectedItem, setSelectedItem] = React.useState(null);
     let classList = [];
     classList.push(className ? className : 'menu-item');
@@ -19,8 +19,8 @@ export default ({ link, icon, children, selected, className, title, onSelect, on
     return (
         <>
             {
-                link ? <Link to={link} className={classList} onClick={() => onSelect(children)}>{ innerContent }</Link>
-                : <div className={classList} onClick={() => onSelect(children)}>{ innerContent }</div>
+                link ? <Link to={link} className={classList} onClick={() => onSelect(children)} {...rest}>{ innerContent }</Link>
+                : <div className={classList} onClick={() => onSelect(children)} {...rest}>{ innerContent }</div>
             }
             { selected && children ? 
                     <div className='submenu'>

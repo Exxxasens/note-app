@@ -7,6 +7,7 @@ body {
         width: 100%;
         min-height: 100vh;
         display: flex;
+        color: white;
 
         .add {
             background-color: #597aff;
@@ -40,15 +41,4 @@ body {
 
 *, *::after, *::before {
     box-sizing: border-box;
-}
-
-@media (prefers-color-scheme: dark) {
-    .wrapper {
-        color: whitesmoke;
-    }
-}
-@media (prefers-color-scheme: light) {
-    .wrapper {
-        color: #363636;
-    }
 }
