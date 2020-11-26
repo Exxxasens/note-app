@@ -1,64 +1,44 @@
 import React from 'react';
 import './App.scss';
-import { Menu, MenuItem } from '../Menu';
+import { Menu, MenuItem, CategoryMenuItem } from '../Menu';
 import MainPage from '../pages/MainPage';
 import { HashRouter as Router, Switch, Route } from "react-router-dom";
 import withRouteToProps from '../hoc/withRouteToProps';
-import StorageApi from '../../Storage';
 import StorageContext from '../contexts/StorageContext';
 import CreateCategory from '../CreateCategory';
-import useContextMenu from '../hooks/useContextMenu';
+import PlatformContext from '../contexts/PlatformContext';
+import PopUp from '../PopUp';
+
+const electron = require('electron');
+const StorageApi = electron.remote.getGlobal('StorageApi');
 
 const WrappedMainPage = withRouteToProps(MainPage, ({ match: { params: { type }} }) => {
     let filterFn = null;
-    if(type === 'all') {
+
+    if(type === 'all') 
         filterFn = (item) => !item.done
-    }
-    if(type === 'done') {
+    
+    if(type === 'done') 
         filterFn = (item) => item.done;
-    }
+    
     return { filterNotesFn: filterFn };
 });
 
-const { dialog, getCurrentWindow } = require('electron').remote;
-const CategoryMenuItem = ({ storage, name, ...rest}) => {
-    const onDelete = () => {
-        const options = {
-            type: 'question',
-            buttons: ['Отменить', 'Удалить категорию и все вложения', 'Удалить только категорию'],
-            defaultId: 2,
-            title: 'Удалить',
-            message: `Удалить категорию "${name}"?`,
-        };
-        dialog.showMessageBox(getCurrentWindow(), options)
-            .then(({ response }) => {
-                if(response === 2) storage.deleteCategory(rest.id);
-                // TODO: add method to delete all notes with the specified cateogry
-                if(response === 1) console.log('delete all');
-            });
-    }
-    const showContextMenu = useContextMenu(
-        React.useCallback(() => [
-                {
-                    label: 'Удалить',
-                    click: onDelete
-                }
-            ], [])
-    );
-    return <MenuItem {...rest} onContextMenu={showContextMenu} />
-}
-
 export default () => {
-    const storage = React.useMemo(() => new StorageApi(), []);
     const [notes, setNotes] = React.useState([]);
     const [categories, setCategories] = React.useState([]);
     const [title, setTitle] = React.useState(null);
     const [category, setCategory] = React.useState(null);
+    const [popUpContent, setContent] = React.useState(null);
 
+    const platform = React.useContext(PlatformContext);
+    const storage = React.useMemo(() => new StorageApi(), []);
+    
     const handleSubMenuSelect = ({ title, type, id }) => {
-        type === 'category' ? setCategory(id) : setCategory(null);
+        (type === 'category') ? setCategory(id) : setCategory(null);
         setTitle(title);
     }
+
     const mapFn = ({ title, _id, color }) => {
         if(!title || !_id) return null;
         const titleDiv = (
@@ -67,10 +47,27 @@ export default () => {
                 { title }
             </React.Fragment>
         )
+
+        const deleteCategory = (id) => {
+            storage.deleteCategory(id);
+            setContent(null);
+        }
+
+        const renderPopUp = () => (
+            <div className='popup-category'>
+                <h1>Удалить категорию {title}?</h1>
+                <div className='btn-items'>
+                    <button onClick={() => deleteCategory(_id)}>Удалить только категорию</button>
+                    <button>Удалить категорию и все вложения</button>
+                    <button onClick={() => setContent(null)}>Отмена</button>
+                </div>
+            </div>
+        )
+
         return <CategoryMenuItem
+            setPopUpContent={() => setContent(renderPopUp())}
             storage={storage}
             className='menu-item row'
-            name={title}
             title={titleDiv}
             link={`/list/category/${_id}`}
             type='category'
@@ -90,9 +87,6 @@ export default () => {
             .then(doc => console.log(doc))
             .catch(err => console.log(err));
     }
-    
-    // TODO: delete this
-    // window.storage = storage;
 
     React.useEffect(() => {
         const updateState = () => {
@@ -108,10 +102,14 @@ export default () => {
         return () => storage.removeAllListeners('update');
     }, []);
 
+    let classList = ['wrapper'];
+    if(platform !== 'darwin') classList.push('bg');
+    classList = classList.join(' ');
+
     return (
         <Router>
             <StorageContext.Provider value={storage}>
-                <div className='wrapper'>
+                <div className={classList}>
                     <Menu onSubMenuSelect={handleSubMenuSelect}>
                         <MenuItem icon='list' title='Напоминания'>
                             <MenuItem title='Все' link='/list/all'/>
@@ -150,6 +148,7 @@ export default () => {
                         />
                     </Switch>
                 </div>
+                { popUpContent ? <PopUp>{popUpContent}</PopUp> : null }
             </StorageContext.Provider>
         </Router>
     )
