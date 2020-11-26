@@ -1,7 +1,8 @@
 const { app, BrowserWindow, Menu, nativeTheme } = require('electron');
 const path = require('path');
 const url = require('url');
-let mainWindow;
+const StorageApi = require('./Storage');
+
 
 function setMenu (menuTemplate) {
     return Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
@@ -32,7 +33,7 @@ app.on('ready', () => {
         }
     });
     loadFile(mainWindow, ['static', 'index.html'])
-        .then(() => console.log('padge loaded'))
+        .then(() => console.log('page loaded'))
         .catch(() => console.log('cannot load page'));
     const menuTemplate = [
         { 
@@ -47,3 +48,5 @@ app.on('ready', () => {
     
     setMenu(menuTemplate);
 });
+
+global.StorageApi = StorageApi;

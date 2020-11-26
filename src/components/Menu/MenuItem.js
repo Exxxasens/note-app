@@ -3,16 +3,17 @@ import { Link } from 'react-router-dom';
 
 export default ({ link, icon, children, selected, className, title, onSelect, onSubMenuSelect, ...rest }) => {
     const [selectedItem, setSelectedItem] = React.useState(null);
+    
     let classList = [];
     classList.push(className ? className : 'menu-item');
     if(selected) classList.push('active');
     classList = classList.join(' ');
 
     let innerContent = (
-        <>
+        <React.Fragment>
             { icon ? <div className='icon'><span className="material-icons">{ icon }</span></div> : null }
-            { title ? <div className='title'>{title}</div> : null }
-        </>
+            { title ? <div className='title'>{ title }</div> : null }
+        </React.Fragment>
     )
 
 
