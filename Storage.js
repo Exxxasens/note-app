@@ -1,12 +1,22 @@
-import { EventEmitter } from 'events';
-
+const { EventEmitter } = require('events');
 const Database = require('nedb')
 const path = require('path');
-const { app } = require('electron').remote;
-
+const { app } = require('electron');
+const onload = (e) => {
+    if(e) return console.log(e);
+    console.log('ok, loaded');
+}
 const db = {
-    notes: new Database({ filename: path.join(app.getPath('userData'), 'notes.db'), autoload: true }),
-    categories: new Database({ filename: path.join(app.getPath('userData'), 'categories.db'), autoload: true })
+    notes: new Database({ 
+        filename: path.join(app.getPath('userData'), 'notes.db'), 
+        autoload: true, 
+        onload 
+    }),
+    categories: new Database({
+        filename: path.join(app.getPath('userData'), 'categories.db'), 
+        autoload: true, 
+        onload 
+    })
 }
 
 class StorageApi extends EventEmitter {
@@ -120,4 +130,4 @@ class StorageApi extends EventEmitter {
     }
 }
 
-export default StorageApi;
+module.exports = StorageApi;
