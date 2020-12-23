@@ -1,7 +1,7 @@
 const { EventEmitter } = require('events');
 const Database = require('nedb')
 const path = require('path');
-const { app } = require('electron');
+const app = require('electron').remote.app
 const onload = (e) => {
     if(e) return console.log(e);
     console.log('ok, loaded');
@@ -101,6 +101,15 @@ class StorageApi extends EventEmitter {
             });
         });
     }
+    updateCategory(_id, update) {
+        return new Promise((resolve, reject) => {
+            db.categories.update({ _id }, { $set: update }, {}, (err, num) => {
+                if(err) reject(err);
+                this.emit('update');
+                resolve(num);
+            });
+        });
+    }
     clearAllNotes() {
         return new Promise((resolve, reject) => 
             db.notes.remove({}, { multi: true }, (err, num) => {
@@ -118,6 +127,20 @@ class StorageApi extends EventEmitter {
                 resolve(num)
             })
         );
+    }
+    clearCategory(_id) {
+        return new Promise((resolve, reject) => {
+            db.notes.remove({ category: _id }, { multi: true }, (err, num) => {
+                console.log(`deleted ${num} notes`);
+                if(err) reject(err);
+                this.deleteCategory(_id)
+                    .then(resolve)
+                    .catch(reject);
+            });
+        });
+    }
+    async syncDatabase() {
+
     }
     async getAllNotesWithCategories() {
         let notes = await this.getAllNotes();

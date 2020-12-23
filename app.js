@@ -1,8 +1,6 @@
 const { app, BrowserWindow, Menu, nativeTheme } = require('electron');
 const path = require('path');
 const url = require('url');
-const StorageApi = require('./Storage');
-
 
 function setMenu (menuTemplate) {
     return Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
@@ -48,5 +46,3 @@ app.on('ready', () => {
     
     setMenu(menuTemplate);
 });
-
-global.StorageApi = StorageApi;

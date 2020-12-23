@@ -1,18 +1,16 @@
 import React from 'react';
 import './App.scss';
 import { Menu, MenuItem, CategoryMenuItem } from '../Menu';
-import MainPage from '../pages/MainPage';
+import { NotePage } from '../pages';
 import { HashRouter as Router, Switch, Route } from "react-router-dom";
 import withRouteToProps from '../hoc/withRouteToProps';
 import StorageContext from '../contexts/StorageContext';
 import CreateCategory from '../CreateCategory';
 import PlatformContext from '../contexts/PlatformContext';
 import PopUp from '../PopUp';
+import StorageApi from '../../Storage';
 
-const electron = require('electron');
-const StorageApi = electron.remote.getGlobal('StorageApi');
-
-const WrappedMainPage = withRouteToProps(MainPage, ({ match: { params: { type }} }) => {
+const WrappedNotePage = withRouteToProps(NotePage, ({ match: { params: { type }} }) => {
     let filterFn = null;
 
     if(type === 'all') 
@@ -41,38 +39,16 @@ export default () => {
 
     const mapFn = ({ title, _id, color }) => {
         if(!title || !_id) return null;
-        const titleDiv = (
-            <React.Fragment>
-                <div className='circle' style={{ backgroundColor: globalThis.getColor(color) }}></div>
-                { title }
-            </React.Fragment>
-        )
-
-        const deleteCategory = (id) => {
-            storage.deleteCategory(id);
-            setContent(null);
-        }
-
-        const renderPopUp = () => (
-            <div className='popup-category'>
-                <h1>Удалить категорию {title}?</h1>
-                <div className='btn-items'>
-                    <button onClick={() => deleteCategory(_id)}>Удалить только категорию</button>
-                    <button>Удалить категорию и все вложения</button>
-                    <button onClick={() => setContent(null)}>Отмена</button>
-                </div>
-            </div>
-        )
-
         return <CategoryMenuItem
-            setPopUpContent={() => setContent(renderPopUp())}
+            setPopUpContent={(content) => setContent(content)}
             storage={storage}
             className='menu-item row'
-            title={titleDiv}
+            title={title}
             link={`/list/category/${_id}`}
             type='category'
             id={_id}
             key={_id}
+            colorId={color}
         />;
     }
 
@@ -105,7 +81,7 @@ export default () => {
     let classList = ['wrapper'];
     if(platform !== 'darwin') classList.push('bg');
     classList = classList.join(' ');
-
+    // <MenuItem link='/settings' icon='settings' title='Настройки'></MenuItem>
     return (
         <Router>
             <StorageContext.Provider value={storage}>
@@ -119,14 +95,13 @@ export default () => {
                             { categories ? categories.map(mapFn) : null }
                             <CreateCategory onCreate={onCategoryCreate} />
                         </MenuItem>
-                        <MenuItem link='/calendar' icon='calendar_today' title='Календарь'></MenuItem>
-                        <MenuItem link='/settings' icon='settings' title='Настройки'></MenuItem>
+                        
                     </Menu>
                     <Switch>
                         <Route path='/list/category/:id' 
                             render={({ match }) => {
                                 let filterFn = ({ category: c }) => c && (c._id === match.params.id);
-                                return  <MainPage 
+                                return  <NotePage 
                                     topBarSubTitle={title} 
                                     notes={notes} 
                                     handleCreate={onCreate}
@@ -136,7 +111,7 @@ export default () => {
                         />
                         <Route path='/list/:type'
                             render={
-                                ({ match, location, history }) => <WrappedMainPage
+                                ({ match, location, history }) => <WrappedNotePage
                                         match={match}
                                         location={location}
                                         history={history}

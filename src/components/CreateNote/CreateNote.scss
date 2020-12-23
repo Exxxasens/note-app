@@ -32,6 +32,7 @@
     }
     .form-wrapper {
         display: flex;
+        justify-content: center;
         margin-bottom: 1rem;
         form {
             display: flex;
@@ -62,14 +63,14 @@
         }
         .title-input {
             padding: 0.8rem 1rem;
-            color: #363636;
+            color: white;
             border: none;
             border-radius: 6px;
             border-top-right-radius: 0;
             border-bottom-right-radius: 0;
             width: 15rem;
             font-size: 1rem;
-            background: rgb(255, 255, 255, 0.5);
+            background: rgb(255, 255, 255, 0.25);
             &:focus { 
                 outline: none !important;
             }

@@ -1,6 +1,7 @@
 import React from 'react';
 import useContextMenu from '../hooks/useContextMenu';
 import PlatfromContext from '../contexts/PlatformContext';
+import getColorFromListById from '../../getColorFromListById';
 
 
 export default ({ id, title, important, category, done, createdAt, categories, storage, showPopUp }) => {
@@ -44,10 +45,6 @@ export default ({ id, title, important, category, done, createdAt, categories, s
                 submenu: categorySubmenu
             },
             {
-                label: 'Время',
-                click: () => showPopUp(id)
-            },
-            {
                 type: 'separator'
             },
             {
@@ -78,6 +75,13 @@ export default ({ id, title, important, category, done, createdAt, categories, s
         if(category && (cId === category._id)) return storage.updateNote(id, { category: null });
         return storage.updateNote(id, { category: cId });
     }
+
+    let circleStyle = {};
+
+    if (getColorFromListById(category.color)) {
+        circleStyle = { backgroundColor: getColorFromListById(category.color).hex };
+    }
+
     let classList = ['note-item'];
     if(done) classList.push('done');
     classList = classList.join(' ');
@@ -95,7 +99,7 @@ export default ({ id, title, important, category, done, createdAt, categories, s
                 </div>
             </div>
             <div className='row'>
-                { category ? <div className='circle' style={{ backgroundColor: globalThis.getColor(category.color) }}></div> : null }
+                { category ? <div className='circle' style={circleStyle}></div> : null }
                 { category ? <div className='category'>{ category.title }</div> : null }
                 { important ?  <div className='important'><span className="material-icons icon">star</span>Важное</div> : null }
                 <div className='item-create-date'>{ beautifyDate(createdAt) }</div>
